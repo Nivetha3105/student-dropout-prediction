@@ -1,0 +1,396 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --bg-primary: #0D1117;
+    --bg-surface: #161B22;
+    --bg-elevated: #1C2128;
+    --border: #21262D;
+    --border-subtle: #30363D;
+    --text-primary: #E6EDF3;
+    --text-secondary: #8B949E;
+    --text-muted: #484F58;
+    --accent: #6366F1;
+    --accent-hover: #818CF8;
+    --risk-high: #EF4444;
+    --risk-medium: #F59E0B;
+    --risk-low: #22C55E;
+    --risk-high-bg: rgba(239, 68, 68, 0.1);
+    --risk-medium-bg: rgba(245, 158, 11, 0.1);
+    --risk-low-bg: rgba(34, 197, 94, 0.1);
+  }
+
+  .light {
+    --bg-primary: #F6F8FA;
+    --bg-surface: #FFFFFF;
+    --bg-elevated: #F0F6FF;
+    --border: #D0D7DE;
+    --border-subtle: #E2E8F0;
+    --text-primary: #1F2328;
+    --text-secondary: #636C76;
+    --text-muted: #9BA1A6;
+    --accent: #6366F1;
+    --accent-hover: #4F46E5;
+  }
+
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-size: 14px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--bg-primary);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--border-subtle);
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--text-muted);
+  }
+}
+
+@layer components {
+  /* ── Cards ──────────────────────────────────── */
+  .card {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--border-subtle);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  }
+
+  /* ── Buttons ─────────────────────────────────── */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .btn-primary {
+    background-color: var(--accent);
+    color: #fff;
+  }
+  .btn-primary:hover {
+    background-color: var(--accent-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.35);
+  }
+
+  .btn-secondary {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+  }
+  .btn-secondary:hover {
+    background-color: var(--bg-surface);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-danger {
+    background-color: rgba(239, 68, 68, 0.1);
+    color: var(--risk-high);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+  .btn-danger:hover {
+    background-color: rgba(239, 68, 68, 0.2);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    color: var(--text-secondary);
+    border: 1px solid transparent;
+  }
+  .btn-ghost:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  /* ── Form inputs ─────────────────────────────── */
+  .input {
+    width: 100%;
+    background-color: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    color: var(--text-primary);
+    font-size: 13px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    outline: none;
+  }
+
+  .input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  }
+
+  .input::placeholder {
+    color: var(--text-muted);
+  }
+
+  .label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── Risk badges ─────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .badge-high {
+    background-color: var(--risk-high-bg);
+    color: var(--risk-high);
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+  .badge-medium {
+    background-color: var(--risk-medium-bg);
+    color: var(--risk-medium);
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+  .badge-low {
+    background-color: var(--risk-low-bg);
+    color: var(--risk-low);
+    border: 1px solid rgba(34, 197, 94, 0.25);
+  }
+  .badge-unknown {
+    background-color: rgba(107, 114, 128, 0.1);
+    color: #6B7280;
+    border: 1px solid rgba(107, 114, 128, 0.2);
+  }
+
+  /* ── Tables ──────────────────────────────────── */
+  .table-wrap {
+    overflow-x: auto;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background-color: var(--bg-elevated);
+    padding: 10px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  thead th:hover {
+    color: var(--text-primary);
+  }
+
+  tbody tr {
+    transition: background-color 0.1s;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background-color: var(--bg-elevated);
+    cursor: pointer;
+  }
+
+  td {
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    vertical-align: middle;
+  }
+
+  /* ── Skeleton loaders ──────────────────────────── */
+  @keyframes skeleton-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--bg-elevated) 25%,
+      var(--border) 50%,
+      var(--bg-elevated) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-shimmer 1.5s infinite;
+    border-radius: 6px;
+  }
+
+  /* ── Sidebar ─────────────────────────────────── */
+  .sidebar {
+    width: 240px;
+    min-width: 240px;
+    background-color: var(--bg-surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 40;
+    overflow-y: auto;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 8px;
+    margin: 1px 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    transition: all 0.15s;
+    text-decoration: none;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+
+  .sidebar-link:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-primary);
+  }
+
+  .sidebar-link.active {
+    background-color: rgba(99, 102, 241, 0.12);
+    color: var(--accent);
+  }
+
+  .sidebar-link.active svg {
+    color: var(--accent);
+  }
+
+  /* ── Modal ───────────────────────────────────── */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+
+  .modal {
+    background: var(--bg-surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    width: 100%;
+    max-width: 520px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  }
+
+  /* ── Notification dot ────────────────────────── */
+  .notif-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--risk-high);
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.6; transform: scale(1.3); }
+  }
+
+  /* ── Progress bar (risk score) ───────────────── */
+  .risk-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+
+  .risk-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.8s ease;
+  }
+
+  /* ── Stat number count-up ─────────────────────── */
+  .stat-number {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* ── Tooltip ─────────────────────────────────── */
+  .custom-tooltip {
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 8px !important;
+    padding: 10px 14px !important;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3) !important;
+  }
+}

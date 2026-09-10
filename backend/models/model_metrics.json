@@ -1,0 +1,37 @@
+{
+  "accuracy": 0.8133,
+  "cv_accuracy_mean": 0.814,
+  "cv_accuracy_std": 0.0223,
+  "n_estimators": 200,
+  "model_type": "RandomForestClassifier",
+  "feature_importances": {
+    "fee_delay_days": 0.3041,
+    "attendance_pct": 0.2373,
+    "attendance_trend_3m": 0.1471,
+    "grade_trend": 0.11,
+    "family_income_encoded": 0.0981,
+    "backlogs": 0.0833,
+    "extracurricular": 0.0201
+  },
+  "shap_available": true,
+  "label_classes": [
+    "High",
+    "Low",
+    "Medium"
+  ],
+  "precision": {
+    "High": 0.7,
+    "Low": 0.883,
+    "Medium": 0.7248
+  },
+  "recall": {
+    "High": 0.7368,
+    "Low": 0.8531,
+    "Medium": 0.7596
+  },
+  "f1": {
+    "High": 0.7179,
+    "Low": 0.8678,
+    "Medium": 0.7418
+  }
+}
