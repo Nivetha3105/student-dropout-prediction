@@ -487,57 +487,59 @@ export default function StudentDetailPage() {
             onClick={() => setShowModal(false)}
           >
             <motion.div
-              className="modal"
+              className="modal-content"
               initial={{ opacity: 0, y: 16, scale: 0.97 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 16, scale: 0.97 }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700 }}>Log Intervention</h3>
-                <button className="btn btn-ghost" onClick={() => setShowModal(false)} style={{ padding: 6 }}>
-                  <X size={16} />
+              <div className="modal-header">
+                <h3>Log Intervention</h3>
+                <button className="icon-btn" onClick={() => setShowModal(false)}>
+                  <X size={18} />
                 </button>
               </div>
 
-              <form onSubmit={handleLogIntervention}>
-                <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="label" htmlFor="int-action">Action Type</label>
-                  <select
-                    id="int-action"
-                    className="input"
-                    value={intForm.action_taken}
-                    onChange={e => setIntForm(f => ({ ...f, action_taken: e.target.value }))}
-                  >
-                    {ACTION_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
-                  </select>
+              <form onSubmit={handleLogIntervention} style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="modal-body">
+                  <div className="form-group" style={{ marginBottom: 16 }}>
+                    <label className="label" htmlFor="int-action">Action Type</label>
+                    <select
+                      id="int-action"
+                      className="input"
+                      value={intForm.action_taken}
+                      onChange={e => setIntForm(f => ({ ...f, action_taken: e.target.value }))}
+                    >
+                      {ACTION_TYPES.map(a => <option key={a} value={a}>{a}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="form-group" style={{ marginBottom: 16 }}>
+                    <label className="label" htmlFor="int-notes">Notes</label>
+                    <textarea
+                      id="int-notes"
+                      className="input"
+                      rows={3}
+                      placeholder="Describe the intervention details..."
+                      value={intForm.notes}
+                      onChange={e => setIntForm(f => ({ ...f, notes: e.target.value }))}
+                      style={{ resize: 'vertical' }}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label className="label" htmlFor="int-followup">Follow-up Date (Optional)</label>
+                    <input
+                      id="int-followup"
+                      className="input"
+                      type="date"
+                      value={intForm.follow_up_date}
+                      onChange={e => setIntForm(f => ({ ...f, follow_up_date: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-group" style={{ marginBottom: 16 }}>
-                  <label className="label" htmlFor="int-notes">Notes</label>
-                  <textarea
-                    id="int-notes"
-                    className="input"
-                    rows={3}
-                    placeholder="Describe the intervention details..."
-                    value={intForm.notes}
-                    onChange={e => setIntForm(f => ({ ...f, notes: e.target.value }))}
-                    style={{ resize: 'vertical' }}
-                  />
-                </div>
-
-                <div className="form-group" style={{ marginBottom: 24 }}>
-                  <label className="label" htmlFor="int-followup">Follow-up Date (Optional)</label>
-                  <input
-                    id="int-followup"
-                    className="input"
-                    type="date"
-                    value={intForm.follow_up_date}
-                    onChange={e => setIntForm(f => ({ ...f, follow_up_date: e.target.value }))}
-                  />
-                </div>
-
-                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>
                     Cancel
                   </button>

@@ -54,6 +54,7 @@ def create_app(config_name=None):
     from app.admin import admin_bp
     from app.reports import reports_bp
     from app.notifications import notifications_bp
+    from app.ai import ai_bp
 
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(students_bp, url_prefix="/api/students")
@@ -63,6 +64,7 @@ def create_app(config_name=None):
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.register_blueprint(reports_bp, url_prefix="/api/reports")
     app.register_blueprint(notifications_bp, url_prefix="/api/notifications")
+    app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
     # Create tables
     with app.app_context():

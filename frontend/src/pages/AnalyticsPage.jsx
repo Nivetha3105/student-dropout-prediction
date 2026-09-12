@@ -83,7 +83,7 @@ export default function AnalyticsPage() {
             title="Total Students"
             value={data.total_students}
             icon={Users}
-            color="#6366F1"
+            color="#14B8A6"
           />
           <StatCard
             title="High Risk Students"
@@ -266,7 +266,7 @@ export default function AnalyticsPage() {
                       transition={{ duration: 0.6, delay: 0.6 + y.year * 0.1 }}
                       style={{
                         width: '100%', maxWidth: 48, borderRadius: '6px 6px 0 0',
-                        background: `linear-gradient(to top, var(--accent), rgba(99,102,241,0.4))`,
+                        background: `linear-gradient(to top, var(--accent), rgba(20,184,166,0.4))`,
                       }}
                     />
                   </div>

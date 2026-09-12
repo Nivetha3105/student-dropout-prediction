@@ -14,7 +14,7 @@
 
 .page-content {
   flex: 1;
-  padding: 24px;
+  padding: 32px;
   max-width: 1400px;
   width: 100%;
 }
@@ -156,7 +156,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0D1117 0%, #161B22 50%, #1a1040 100%);
+  background: var(--bg-primary);
   position: relative;
   overflow: hidden;
 }
@@ -181,10 +181,10 @@
 .login-card {
   background: var(--bg-surface);
   border: 1px solid var(--border);
-  border-radius: 20px;
+  border-radius: 16px;
   padding: 40px;
   width: 100%;
-  max-width: 420px;
+  max-width: 400px;
   position: relative;
   z-index: 1;
   box-shadow: 0 24px 80px rgba(0, 0, 0, 0.5);

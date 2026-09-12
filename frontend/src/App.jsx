@@ -8,6 +8,7 @@ import DashboardPage from './pages/DashboardPage'
 import StudentDetailPage from './pages/StudentDetailPage'
 import AnalyticsPage from './pages/AnalyticsPage'
 import AdminPage from './pages/AdminPage'
+import GenAIAssistant from './components/GenAIAssistant'
 import './App.css'
 
 function ProtectedRoute() {
@@ -43,6 +44,7 @@ function ProtectedRoute() {
       <div className="main-area">
         <Outlet />
       </div>
+      <GenAIAssistant />
     </div>
   )
 }

@@ -45,7 +45,7 @@ export const studentsAPI = {
   bulkUpload: (formData) => api.post('/students/bulk', formData, {
     headers: { 'Content-Type': 'multipart/form-data' },
   }),
-  exportCSV: () => api.get('/students/export/csv', { responseType: 'blob' }),
+  exportCSV: (params) => api.get('/students/export/csv', { params, responseType: 'blob' }),
 }
 
 // ─── Predictions ────────────────────────────────
@@ -82,13 +82,18 @@ export const adminAPI = {
 // ─── Reports ────────────────────────────────────
 export const reportsAPI = {
   downloadPDF: (studentId) => api.get(`/reports/${studentId}/pdf`, { responseType: 'blob' }),
+  downloadHighRiskPDF: () => api.get('/reports/high-risk/pdf', { responseType: 'blob' }),
 }
 
-// ─── Notifications ──────────────────────────────
 export const notificationsAPI = {
   list: (params) => api.get('/notifications', { params }),
   markRead: (id) => api.patch(`/notifications/${id}/read`),
   markAllRead: () => api.patch('/notifications/read-all'),
+}
+
+// ─── AI ─────────────────────────────────────────
+export const aiAPI = {
+  query: (query) => api.post('/ai/query', { query }),
 }
 
 export default api

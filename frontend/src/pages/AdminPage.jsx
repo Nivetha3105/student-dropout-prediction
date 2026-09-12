@@ -174,43 +174,46 @@ function UsersTab() {
       <AnimatePresence>
         {showAdd && (
           <motion.div className="modal-overlay" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowAdd(false)}>
-            <motion.div className="modal" initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.97 }} onClick={e => e.stopPropagation()}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700 }}>Add New User</h3>
-                <button className="btn btn-ghost" onClick={() => setShowAdd(false)} style={{ padding: 6 }}><X size={16} /></button>
+            <motion.div className="modal-content" initial={{ opacity: 0, y: 16, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: 16, scale: 0.97 }} onClick={e => e.stopPropagation()}>
+              <div className="modal-header">
+                <h3>Add New User</h3>
+                <button className="icon-btn" onClick={() => setShowAdd(false)}><X size={18} /></button>
               </div>
-              {addError && (
-                <div className="login-error" style={{ marginBottom: 14 }}>
-                  <AlertCircle size={14} /> {addError}
-                </div>
-              )}
-              <form onSubmit={handleAdd}>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="label">Name</label>
-                  <input className="input" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Dr. John Doe" />
-                </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="label">Email</label>
-                  <input className="input" type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@dropout.edu" />
-                </div>
-                <div style={{ marginBottom: 14 }}>
-                  <label className="label">Password</label>
-                  <input className="input" type="password" required value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Minimum 6 characters" />
-                </div>
-                <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
-                  <div style={{ flex: 1 }}>
-                    <label className="label">Role</label>
-                    <select className="input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
-                      <option value="faculty">Faculty</option>
-                      <option value="admin">Admin</option>
-                    </select>
+              
+              <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column' }}>
+                <div className="modal-body">
+                  {addError && (
+                    <div className="login-error" style={{ marginBottom: 14 }}>
+                      <AlertCircle size={14} /> {addError}
+                    </div>
+                  )}
+                  <div style={{ marginBottom: 14 }}>
+                    <label className="label">Name</label>
+                    <input className="input" required value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} placeholder="Dr. John Doe" />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <label className="label">Department</label>
-                    <input className="input" value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} placeholder="CSE" />
+                  <div style={{ marginBottom: 14 }}>
+                    <label className="label">Email</label>
+                    <input className="input" type="email" required value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))} placeholder="john@dropout.edu" />
+                  </div>
+                  <div style={{ marginBottom: 14 }}>
+                    <label className="label">Password</label>
+                    <input className="input" type="password" required value={form.password} onChange={e => setForm(f => ({ ...f, password: e.target.value }))} placeholder="Minimum 6 characters" />
+                  </div>
+                  <div style={{ display: 'flex', gap: 12, marginBottom: 14 }}>
+                    <div style={{ flex: 1 }}>
+                      <label className="label">Role</label>
+                      <select className="input" value={form.role} onChange={e => setForm(f => ({ ...f, role: e.target.value }))}>
+                        <option value="faculty">Faculty</option>
+                        <option value="admin">Admin</option>
+                      </select>
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <label className="label">Department</label>
+                      <input className="input" value={form.department} onChange={e => setForm(f => ({ ...f, department: e.target.value }))} placeholder="CSE" />
+                    </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+                <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => setShowAdd(false)}>Cancel</button>
                   <button type="submit" className="btn btn-primary" disabled={addLoading}>
                     {addLoading ? 'Creating...' : 'Create User'}
@@ -380,7 +383,7 @@ function ModelTab() {
             {[
               { label: 'Model', value: metrics.model_type?.replace('Classifier', '') || 'Random Forest' },
               { label: 'Accuracy', value: `${(metrics.accuracy * 100).toFixed(1)}%`, color: '#22C55E' },
-              { label: 'CV Mean', value: `${(metrics.cv_accuracy_mean * 100).toFixed(1)}%`, color: '#6366F1' },
+              { label: 'CV Mean', value: `${(metrics.cv_accuracy_mean * 100).toFixed(1)}%`, color: 'var(--accent)' },
               { label: 'Trees', value: metrics.n_estimators || 200 },
               { label: 'SHAP', value: metrics.shap_available ? 'Enabled' : 'Disabled', color: metrics.shap_available ? '#22C55E' : '#F59E0B' },
             ].map((m, i) => (

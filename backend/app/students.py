@@ -288,28 +288,76 @@ def bulk_upload():
 @jwt_required()
 def export_csv():
     from flask import Response
-    students = Student.query.all()
+    
+    department = request.args.get("department")
+    year = request.args.get("year", type=int)
+    risk_level = request.args.get("risk_level")
+    search = request.args.get("search", "").strip()
+
+    query = Student.query
+
+    if department:
+        query = query.filter_by(department=department)
+    if year:
+        query = query.filter_by(year=year)
+    if search:
+        query = query.filter(
+            db.or_(
+                Student.name.ilike(f"%{search}%"),
+                Student.roll_number.ilike(f"%{search}%"),
+            )
+        )
+
+    if risk_level:
+        latest_pred_subq = (
+            db.session.query(
+                Prediction.student_id,
+                func.max(Prediction.predicted_at).label("max_at"),
+            )
+            .group_by(Prediction.student_id)
+            .subquery()
+        )
+        latest = (
+            db.session.query(Prediction.student_id, Prediction.risk_level)
+            .join(
+                latest_pred_subq,
+                (Prediction.student_id == latest_pred_subq.c.student_id) &
+                (Prediction.predicted_at == latest_pred_subq.c.max_at),
+            )
+            .subquery()
+        )
+        query = query.join(latest, Student.id == latest.c.student_id).filter(
+            latest.c.risk_level == risk_level
+        )
+
+    students = query.all()
     output = io.StringIO()
     fieldnames = [
-        "id", "name", "roll_number", "email", "department", "year",
-        "attendance_pct", "backlogs", "grade_trend", "fee_delay_days",
-        "family_income_bracket", "extracurricular", "attendance_trend_3m",
-        "risk_level", "risk_score",
+        "name", "roll_number", "department", "year",
+        "risk_score", "risk_level", "top_risk_factors",
+        "last_prediction_date", "current_intervention_status"
     ]
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
+    
     for s in students:
         lp = s.latest_prediction
+        latest_intervention = s.interventions.first()
+        
+        top_factors_str = ""
+        if lp and lp.top_factors:
+            top_factors_str = "; ".join([f"{f['display_name']} ({f['impact']})" for f in lp.top_factors])
+
         row = {
-            "id": s.id, "name": s.name, "roll_number": s.roll_number,
-            "email": s.email or "", "department": s.department, "year": s.year,
-            "attendance_pct": s.attendance_pct, "backlogs": s.backlogs,
-            "grade_trend": s.grade_trend, "fee_delay_days": s.fee_delay_days,
-            "family_income_bracket": s.family_income_bracket,
-            "extracurricular": int(s.extracurricular),
-            "attendance_trend_3m": s.attendance_trend_3m,
-            "risk_level": lp.risk_level if lp else "",
+            "name": s.name, 
+            "roll_number": s.roll_number,
+            "department": s.department, 
+            "year": s.year,
             "risk_score": lp.risk_score if lp else "",
+            "risk_level": lp.risk_level if lp else "",
+            "top_risk_factors": top_factors_str,
+            "last_prediction_date": lp.predicted_at.strftime("%Y-%m-%d") if lp and lp.predicted_at else "",
+            "current_intervention_status": latest_intervention.outcome_status if latest_intervention else "none",
         }
         writer.writerow(row)
 

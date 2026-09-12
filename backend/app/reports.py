@@ -238,3 +238,120 @@ def generate_pdf(student_id):
         mimetype="application/pdf",
         headers={"Content-Disposition": f"attachment; filename={filename}"},
     )
+
+
+@reports_bp.route("/high-risk/pdf", methods=["GET"])
+@jwt_required()
+def generate_high_risk_pdf():
+    from app import db
+    from app.models import Prediction
+    from sqlalchemy import func
+
+    latest_pred_subq = (
+        db.session.query(
+            Prediction.student_id,
+            func.max(Prediction.predicted_at).label("max_at"),
+        )
+        .group_by(Prediction.student_id)
+        .subquery()
+    )
+
+    high_risk_students = (
+        Student.query.join(Prediction, Student.id == Prediction.student_id)
+        .join(
+            latest_pred_subq,
+            (Prediction.student_id == latest_pred_subq.c.student_id) &
+            (Prediction.predicted_at == latest_pred_subq.c.max_at),
+        )
+        .filter(Prediction.risk_level == "High")
+        .order_by(Prediction.risk_score.desc())
+        .all()
+    )
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=2 * cm,
+        leftMargin=2 * cm,
+        topMargin=2 * cm,
+        bottomMargin=2 * cm,
+    )
+
+    styles = getSampleStyleSheet()
+    story = []
+
+    title_style = ParagraphStyle(
+        "Title", parent=styles["Title"],
+        fontSize=22, textColor=colors.HexColor("#1E293B"),
+        spaceAfter=6,
+    )
+    sub_style = ParagraphStyle(
+        "Sub", parent=styles["Normal"],
+        fontSize=11, textColor=colors.HexColor("#64748B"),
+        spaceAfter=12,
+    )
+    label_style = ParagraphStyle(
+        "Label", parent=styles["Normal"],
+        fontSize=10, textColor=colors.HexColor("#94A3B8"),
+        fontName="Helvetica-Bold",
+    )
+    body_style = ParagraphStyle(
+        "Body", parent=styles["Normal"],
+        fontSize=9, textColor=colors.HexColor("#334155"),
+    )
+
+    story.append(Paragraph("High-Risk Students Report", title_style))
+    story.append(Paragraph(
+        f"Generated: {datetime.utcnow().strftime('%B %d, %Y at %H:%M UTC')} | Total High-Risk Students: {len(high_risk_students)}",
+        sub_style
+    ))
+    story.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor("#E2E8F0")))
+    story.append(Spacer(1, 0.4 * cm))
+
+    if high_risk_students:
+        table_data = [[
+            Paragraph("Name", label_style),
+            Paragraph("Roll No", label_style),
+            Paragraph("Dept", label_style),
+            Paragraph("Score", label_style),
+            Paragraph("Top Factors", label_style)
+        ]]
+
+        for s in high_risk_students:
+            lp = s.latest_prediction
+            factors = "; ".join([f["display_name"] for f in lp.top_factors]) if lp.top_factors else ""
+            table_data.append([
+                Paragraph(s.name, body_style),
+                Paragraph(s.roll_number, body_style),
+                Paragraph(s.department, body_style),
+                Paragraph(f"{lp.risk_score:.0f}", body_style),
+                Paragraph(factors, body_style),
+            ])
+
+        table = Table(table_data, colWidths=[4*cm, 2.5*cm, 2*cm, 2*cm, 6.5*cm])
+        table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), colors.HexColor("#334155")),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#F8FAFC")]),
+            ("LEFTPADDING", (0, 0), (-1, -1), 6),
+            ("RIGHTPADDING", (0, 0), (-1, -1), 6),
+            ("TOPPADDING", (0, 0), (-1, -1), 6),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 6),
+            ("BOX", (0, 0), (-1, -1), 0.5, colors.HexColor("#E2E8F0")),
+            ("INNERGRID", (0, 0), (-1, -1), 0.25, colors.HexColor("#E2E8F0")),
+            ("VALIGN", (0, 0), (-1, -1), "TOP"),
+        ]))
+        story.append(table)
+    else:
+        story.append(Paragraph("No high-risk students found.", body_style))
+
+    doc.build(story)
+    buffer.seek(0)
+
+    filename = f"high_risk_report_{datetime.utcnow().strftime('%Y%m%d')}.pdf"
+    return Response(
+        buffer.getvalue(),
+        mimetype="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )

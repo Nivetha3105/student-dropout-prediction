@@ -4,14 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion'
 import {
   Users, AlertTriangle, TrendingUp, Activity,
   Search, Filter, ChevronUp, ChevronDown,
-  ChevronLeft, ChevronRight, RefreshCw, Plus, X
+  ChevronLeft, ChevronRight, RefreshCw, Plus, X, Download, FileText
 } from 'lucide-react'
 import TopBar from '../components/TopBar'
 import StatCard from '../components/StatCard'
 import RiskBadge from '../components/RiskBadge'
 import { SkeletonTable, SkeletonCard } from '../components/SkeletonLoader'
 import EmptyState from '../components/EmptyState'
-import { studentsAPI, analyticsAPI, predictionsAPI } from '../api/client'
+import { studentsAPI, analyticsAPI, predictionsAPI, reportsAPI } from '../api/client'
 
 export default function DashboardPage() {
   const navigate = useNavigate()
@@ -142,6 +142,54 @@ export default function DashboardPage() {
     }
   }
 
+  const handleExportCSV = async () => {
+    try {
+      const params = {}
+      if (search) params.search = search
+      if (department) params.department = department
+      if (year) params.year = year
+      if (riskLevel) params.risk_level = riskLevel
+      
+      const res = await studentsAPI.exportCSV(params)
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('link')
+      link.href = url
+      link.setAttribute('download', 'students_export.csv')
+      document.body.appendChild(link)
+      link.click()
+    } catch (err) {
+      console.error("Failed to export CSV", err)
+    }
+  }
+
+  const handleDownloadHighRiskCSV = async () => {
+    try {
+      const res = await studentsAPI.exportCSV({ risk_level: 'High' })
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('link')
+      link.href = url
+      link.setAttribute('download', 'high_risk_students.csv')
+      document.body.appendChild(link)
+      link.click()
+    } catch (err) {
+      console.error("Failed to export High-Risk CSV", err)
+    }
+  }
+
+  const handleDownloadHighRiskPDF = async () => {
+    try {
+      const res = await reportsAPI.downloadHighRiskPDF()
+      const url = window.URL.createObjectURL(new Blob([res.data]))
+      const link = document.createElement('link')
+      link.href = url
+      link.setAttribute('download', 'high_risk_report.pdf')
+      document.body.appendChild(link)
+      link.click()
+    } catch (err) {
+      console.error("Failed to export High-Risk PDF", err)
+    }
+  }
+
   const departments = ['CSE', 'ECE', 'ME', 'CE', 'MBA', 'BCA', 'Commerce', 'Physics']
 
   const title = isStudentsRoute ? 'Students' : 'Dashboard'
@@ -152,6 +200,23 @@ export default function DashboardPage() {
         title={title}
         actions={
           <div style={{ display: 'flex', gap: 8 }}>
+            <div className="dropdown" style={{ position: 'relative' }}>
+              <button className="btn btn-secondary" onClick={() => document.getElementById('export-menu').classList.toggle('show')}>
+                <Download size={14} /> Export
+              </button>
+              <div id="export-menu" className="dropdown-menu" style={{ position: 'absolute', top: '100%', right: 0, marginTop: 4, background: 'var(--bg-elevated)', border: '1px solid var(--border)', borderRadius: 8, padding: 8, minWidth: 220, zIndex: 10, display: 'none', flexDirection: 'column', gap: 4, boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+                <button className="btn btn-ghost" style={{ justifyContent: 'flex-start' }} onClick={() => { handleExportCSV(); document.getElementById('export-menu').classList.remove('show'); }}>
+                  <FileText size={14} /> Export Filtered (CSV)
+                </button>
+                <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+                <button className="btn btn-ghost" style={{ justifyContent: 'flex-start', color: 'var(--risk-high)' }} onClick={() => { handleDownloadHighRiskCSV(); document.getElementById('export-menu').classList.remove('show'); }}>
+                  <Download size={14} /> High-Risk Only (CSV)
+                </button>
+                <button className="btn btn-ghost" style={{ justifyContent: 'flex-start', color: 'var(--risk-high)' }} onClick={() => { handleDownloadHighRiskPDF(); document.getElementById('export-menu').classList.remove('show'); }}>
+                  <FileText size={14} /> High-Risk Only (PDF)
+                </button>
+              </div>
+            </div>
             <button
               className="btn btn-secondary"
               onClick={() => setShowAdd(true)}
@@ -165,11 +230,21 @@ export default function DashboardPage() {
               disabled={batchLoading}
             >
               <RefreshCw size={14} className={batchLoading ? 'spinning' : ''} />
-              {batchLoading ? 'Running...' : 'Run All Predictions'}
+              {batchLoading ? 'Running...' : 'Run All'}
             </button>
           </div>
         }
       />
+
+      {/* Close dropdown on click outside */}
+      <div onClick={(e) => {
+        if (!e.target.closest('.dropdown')) {
+          const menu = document.getElementById('export-menu');
+          if (menu) menu.classList.remove('show');
+        }
+      }} style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 0, pointerEvents: 'none' }}>
+        <style>{`.dropdown-menu.show { display: flex !important; } .dropdown { pointer-events: auto; }`}</style>
+      </div>
 
       <div className="page-content">
         {/* Stat Cards */}
@@ -185,7 +260,7 @@ export default function DashboardPage() {
                   title="Total Students"
                   value={stats.total_students}
                   icon={Users}
-                  color="#6366F1"
+                  color="#14B8A6"
                   subtitle="Across all departments"
                 />
                 <StatCard
@@ -413,6 +488,169 @@ export default function DashboardPage() {
           </>
         )}
       </div>
+
+      {/* Add Student Modal */}
+      <AnimatePresence>
+        {showAdd && (
+          <div className="modal-overlay" onClick={() => setShowAdd(false)}>
+            <motion.div
+              className="modal-content"
+              onClick={e => e.stopPropagation()}
+              initial={{ opacity: 0, y: 20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: 20, scale: 0.95 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="modal-header">
+                <h3>Add New Student</h3>
+                <button className="icon-btn" onClick={() => setShowAdd(false)}>
+                  <X size={20} />
+                </button>
+              </div>
+              <form onSubmit={handleAddStudent} className="modal-body form-grid">
+                {addError && (
+                  <div className="alert error" style={{ gridColumn: '1 / -1' }}>
+                    <AlertTriangle size={16} />
+                    {addError}
+                  </div>
+                )}
+                
+                <div className="form-group">
+                  <label>Name</label>
+                  <input
+                    className="input"
+                    required
+                    value={addForm.name}
+                    onChange={e => setAddForm(f => ({ ...f, name: e.target.value }))}
+                  />
+                </div>
+                
+                <div className="form-group">
+                  <label>Roll Number</label>
+                  <input
+                    className="input"
+                    required
+                    value={addForm.roll_number}
+                    onChange={e => setAddForm(f => ({ ...f, roll_number: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Email</label>
+                  <input
+                    type="email"
+                    className="input"
+                    required
+                    value={addForm.email}
+                    onChange={e => setAddForm(f => ({ ...f, email: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Department</label>
+                  <select
+                    className="input"
+                    value={addForm.department}
+                    onChange={e => setAddForm(f => ({ ...f, department: e.target.value }))}
+                  >
+                    {departments.map(d => <option key={d} value={d}>{d}</option>)}
+                  </select>
+                </div>
+
+                <div className="form-group">
+                  <label>Year</label>
+                  <input
+                    type="number"
+                    min="1" max="4"
+                    className="input"
+                    required
+                    value={addForm.year}
+                    onChange={e => setAddForm(f => ({ ...f, year: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Attendance %</label>
+                  <input
+                    type="number"
+                    step="0.1" min="0" max="100"
+                    className="input"
+                    required
+                    value={addForm.attendance_pct}
+                    onChange={e => setAddForm(f => ({ ...f, attendance_pct: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Backlogs</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    required
+                    value={addForm.backlogs}
+                    onChange={e => setAddForm(f => ({ ...f, backlogs: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Grade Trend</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className="input"
+                    required
+                    value={addForm.grade_trend}
+                    onChange={e => setAddForm(f => ({ ...f, grade_trend: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Fee Delay (Days)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input"
+                    required
+                    value={addForm.fee_delay_days}
+                    onChange={e => setAddForm(f => ({ ...f, fee_delay_days: e.target.value }))}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Income Bracket</label>
+                  <select
+                    className="input"
+                    value={addForm.family_income_bracket}
+                    onChange={e => setAddForm(f => ({ ...f, family_income_bracket: e.target.value }))}
+                  >
+                    <option value="low">Low</option>
+                    <option value="mid">Mid</option>
+                    <option value="high">High</option>
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ gridColumn: '1 / -1', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <input
+                    type="checkbox"
+                    id="extracurricular"
+                    checked={addForm.extracurricular}
+                    onChange={e => setAddForm(f => ({ ...f, extracurricular: e.target.checked }))}
+                  />
+                  <label htmlFor="extracurricular" style={{ marginBottom: 0 }}>Participates in Extracurricular Activities</label>
+                </div>
+
+                <div className="modal-footer" style={{ gridColumn: '1 / -1' }}>
+                  <button type="button" className="btn btn-secondary" onClick={() => setShowAdd(false)}>Cancel</button>
+                  <button type="submit" className="btn btn-primary" disabled={addLoading}>
+                    {addLoading ? 'Adding...' : 'Add Student'}
+                  </button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
